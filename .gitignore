@@ -1,0 +1,50 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# CLion / JetBrains
+.idea/
+*.iml
+cmake-build-*/
+
+# CMake out-of-source builds and generated files
+build/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# C/C++ build artifacts
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.dSYM/
+
+# Hexo blog dependencies and generated output
+CG_OpenGL_Blog/node_modules/
+CG_OpenGL_Blog/public/
+CG_OpenGL_Blog/.deploy_git/
+CG_OpenGL_Blog/.cache/
+CG_OpenGL_Blog/db.json
+
+# Node package-manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
