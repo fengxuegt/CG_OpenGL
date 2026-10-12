@@ -1,7 +1,10 @@
 #include <cameracontrol.h>
 #include <geometry.h>
 #include <iostream>
+#include <material.h>
+#include <mesh.h>
 #include <perspectivecamera.h>
+#include <phongmaterial.h>
 #include <plane.h>
 #include <shader.h>
 #include <texture.h>
@@ -22,6 +25,7 @@ GLuint planeVao = 0;
 Shader * shader = nullptr;
 Shader * planeShader = nullptr;
 Geometry * box = nullptr;
+Geometry *sphere = nullptr;
 Plane * plane = nullptr;
 Texture * asuna = nullptr;
 GLuint colorAttachment = 0;
@@ -75,6 +79,14 @@ void prepareGeometry() {
     };
     plane = new Plane(verticesPlane, indicesPlane);
     planeVao = plane->GetVao();
+
+    sphere = Geometry::createSphere(3);
+    vao = sphere->getVao();
+    PhongMaterial * material = new PhongMaterial();
+    material->mTexture = asuna;
+    material->mShininess = 1.0f;
+    auto Mesh = new ::Mesh(sphere, material);
+
 
 }
 
@@ -227,7 +239,7 @@ int main() {
         shader->SetUniform3fv("ambient", glm::vec3(0.2f, 0.2f, 0.2f));
         glBindVertexArray(vao);
         asuna->Bind();
-        glDrawElements(GL_TRIANGLES, box->getIndicesCount(), GL_UNSIGNED_INT, (void*)0);
+        glDrawElements(GL_TRIANGLES, sphere->getIndicesCount(), GL_UNSIGNED_INT, (void*)0);
 
         // pass 2
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

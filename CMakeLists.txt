@@ -21,6 +21,8 @@ add_subdirectory(camera)
 add_subdirectory(object)
 #material
 add_subdirectory(material)
+#light
+add_subdirectory(light)
 #复制文件
 # 复制文件
 file(GLOB ASSETS "./assets" )
@@ -32,7 +34,7 @@ file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
 add_executable(CG_OpenGL_createwindow createwindow.cpp)
 add_executable(CG_OpenGL_framebuffer framebuffer_record.cpp)
 
-target_link_libraries(CG_OpenGL_createwindow glad glfw shader geometry glm texture camera object material)
+target_link_libraries(CG_OpenGL_createwindow glad glfw shader geometry glm texture camera object material light)
 target_link_libraries(CG_OpenGL_framebuffer glad glfw shader geometry glm camera)
 
 

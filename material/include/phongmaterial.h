@@ -12,7 +12,7 @@ class PhongMaterial : public Material {
 public:
     PhongMaterial();
     ~PhongMaterial();
-private:
+public:
     Texture *mTexture{nullptr};
     float mShininess{8.0f};
 };
