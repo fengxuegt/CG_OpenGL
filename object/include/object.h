@@ -20,7 +20,7 @@ public:
 
     glm::mat4 GetModelMatrix();
 
-protected:
+public:
     glm::vec3 mPosition{0.0f, 0.0f, 0.0f};
     float mAngleX{0.0f};
     float mAngleY{0.0f};

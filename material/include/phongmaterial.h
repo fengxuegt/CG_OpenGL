@@ -13,8 +13,9 @@ public:
     PhongMaterial();
     ~PhongMaterial();
 public:
-    Texture *mTexture{nullptr};
-    float mShininess{8.0f};
+    Texture *mDiffuse{nullptr};
+    Texture *mSpecularMask{nullptr};
+    float mShininess{1.0f};
 };
 
 

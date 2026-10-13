@@ -6,9 +6,13 @@
 #include <perspectivecamera.h>
 #include <phongmaterial.h>
 #include <plane.h>
+#include <pointlight.h>
+#include <render.h>
 #include <shader.h>
 #include <texture.h>
 #include <triangle.h>
+#include <vector>
+#include <whitematerial.h>
 
 #include "basecore.h"
 #include "gamecameracontrol.h"
@@ -24,48 +28,25 @@ GLuint vao = 0;
 GLuint planeVao = 0;
 Shader * shader = nullptr;
 Shader * planeShader = nullptr;
-Geometry * box = nullptr;
 Geometry *sphere = nullptr;
 Plane * plane = nullptr;
-Texture * asuna = nullptr;
 GLuint colorAttachment = 0;
-glm::vec3 lightDirection = glm::vec3(-1.0f, -1.0f, -1.0f);
-glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-glm::mat4 modelMatrix = glm::mat4(1.0f);
+DirectionalLight * directionalLight = nullptr;
+PointLight * pointLight = nullptr;
+AmbientLight * ambientLight = nullptr;
 
-void prepareShader() {
-    shader = new Shader("assets/shaders/basevertex.vert", "assets/shaders/basefrag.frag");
-    shader->UseProgram();
-    shader->SetUniform1i("asuna", 0);
-    shader->SetUniformMat4("model", modelMatrix);
+GLuint fbo = 0;
 
-
-    shader->SetUniform3fv("lightDirection", lightDirection);
-    shader->SetUniform3fv("lightColor", lightColor);
-
-    shader->SetUniform3fv("cameraPos",camera->mPosition);
-
-    planeShader = new Shader("assets/shaders/plane.vert", "assets/shaders/plane.frag");
-    planeShader->UseProgram();
-    planeShader->SetUniform1i("sampler", 0);
-}
-void prepareTexture() {
-    asuna = new Texture("assets/textures/asuna.png");
-}
-
+std::vector<Mesh*> meshes;
 
 void prepareGeometry() {
-    box = Geometry::createBox(5);
-
-    vao = box->getVao();
-
-/*
- *      0 --------- 3
- *      |           |
- *      |           |
- *      |           |
- *      1 --------- 2
- **/
+    /*
+     *      0 --------- 3
+     *      |           |
+     *      |           |
+     *      |           |
+     *      1 --------- 2
+     **/
     float verticesPlane[] = {
         // position            // color          // uv
         -1.0f, 1.0f, 0.0f,   1.0f, 0.0f, 0.0f,  0.0f, 1.0f, // 0
@@ -80,17 +61,49 @@ void prepareGeometry() {
     plane = new Plane(verticesPlane, indicesPlane);
     planeVao = plane->GetVao();
 
-    sphere = Geometry::createSphere(3);
+
+}
+void prepare() {
+    sphere = Geometry::createBox(2);
     vao = sphere->getVao();
     PhongMaterial * material = new PhongMaterial();
-    material->mTexture = asuna;
-    material->mShininess = 1.0f;
-    auto Mesh = new ::Mesh(sphere, material);
+    Texture *box = new Texture("assets/textures/box.png");
+    Texture * boxMask = new Texture("assets/textures/sp_mask.png");
+    material->mDiffuse = box;
+    material->mSpecularMask = boxMask;
+    material->mShininess = 16.0f;
+    auto mesh = new ::Mesh(sphere, material);
+    meshes.push_back(mesh);
 
+    // point light
+    auto pointlightge = Geometry::createSphere(0.5f);
+    auto whiteMaterial = new WhiteMaterial();
+    auto pointmesh = new Mesh(pointlightge, whiteMaterial);
+    pointmesh->SetPosition(glm::vec3(4.0f, 0.0f,0.0f));
+    meshes.push_back(pointmesh);
+
+    planeShader = new Shader("assets/shaders/plane.vert", "assets/shaders/plane.frag");
+}
+void prepareLight() {
+    glm::vec3 lightDirection = glm::normalize(glm::vec3(-0.3f, -0.5f, -1.0f));
+    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    directionalLight = new DirectionalLight();
+    ambientLight = new AmbientLight();
+    directionalLight->mColor = lightColor;
+    directionalLight->mDirection = lightDirection;
+    directionalLight->mSpecularIntensity = 2.0f;
+    ambientLight->mColor = glm::vec3(0.1f, 0.1f, 0.1f);
+
+    // point light
+    pointLight = new PointLight();
+    pointLight->mColor = lightColor;
+    pointLight->SetPosition(glm::vec3(4.0f, 0.0f,0.0f));
+	pointLight->mK2 = 0.017f;
+	pointLight->mK1 = 0.07f;
+	pointLight->mKc = 1.0f;
 
 }
 
-GLuint fbo = 0;
 void prepareFramebuffer(int width, int height) {
     // framebuffer
     glGenFramebuffers(1, &fbo);
@@ -125,7 +138,7 @@ void prepareFramebuffer(int width, int height) {
     }
 
 }
-
+// callback
 void frameSizeCallback(GLFWwindow * window, int width, int height) {
     std::cout << width << " " << height << std::endl;
     if (height == 0) {
@@ -143,20 +156,18 @@ void keyCallBack(GLFWwindow * window, int key, int scancode, int action, int mod
     std::cout << key << " " << scancode << " " << action << " " << mods << std::endl;
     cameraControl->onKey(key, action, mods);
 }
-
 void mouseButtonCallBack(GLFWwindow * window, int button, int action, int mods) {
     double x, y;
     glfwGetCursorPos(window, &x, &y);
     cameraControl->onMouse(button, action, x, y);
 }
-
 void cursorPositionCallBack(GLFWwindow * window, double xpos, double ypos) {
     cameraControl->onCursor(xpos, ypos);
 }
-
 void scrollCallback(GLFWwindow * window, double xoffset, double yoffset) {
     cameraControl->onScroll(yoffset);
 }
+// SetCallback
 void SetCallBack(GLFWwindow * window) {
     glfwSetFramebufferSizeCallback(window, frameSizeCallback);
     glfwSetKeyCallback(window, keyCallBack);
@@ -165,6 +176,7 @@ void SetCallBack(GLFWwindow * window) {
     glfwSetScrollCallback(window, scrollCallback);
 }
 
+// camera
 void PrepareCamera() {
     camera = new PerspectiveCamera(60.0f, (float)WIDTH/ (float)HEIGHT, 0.1f, 1000.0f);
     cameraControl = new GameCameraControl();
@@ -175,7 +187,17 @@ void PrepareCamera() {
 }
 
 void Transform() {
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // glm::vec3 newPos = glm::mat3(rotate * pointLight->GetModelMatrix()) * pointLight->mPosition;
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(sin(glfwGetTime()) * 0.5, 0.0f, 0.0f));
+    const glm::vec3 pointLightInitialPosition(4.0f, 0.0f, 0.0f);
+    float offsetX =
+        std::sin(static_cast<float>(glfwGetTime())) * 2.f;
+    glm::vec3 newPos =
+        pointLightInitialPosition +
+        glm::vec3(offsetX, 0.0f, 0.0f);
+    pointLight->SetPosition(newPos);
+    meshes[1]->SetPosition(newPos);
 }
 
 int main() {
@@ -214,32 +236,28 @@ int main() {
         &framebufferHeight
     );
 
-    prepareShader();
-    prepareTexture();
     prepareGeometry();
     prepareFramebuffer(framebufferWidth, framebufferHeight);
+    prepare();
+    prepareLight();
 
+    // 设置渲染状态
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_DEPTH_TEST);
+
+
+    Render * render = new Render();
     while (!glfwWindowShouldClose(window)) {
         cameraControl->update();
+
+
         // pass 1
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         // glViewport(0, 0, WIDTH, HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Transform();
-        shader->UseProgram();
-        shader->SetUniformMat4("model", modelMatrix);
-        shader->SetUniformMat4("view", camera->getViewMatrix());
-        shader->SetUniformMat4("perspective", camera->getProjectionMatrix());
-        shader->SetUniformMat4("normalMatrix", glm::transpose(glm::inverse(modelMatrix)));
-        shader->SetUniform3fv("cameraPos",camera->mPosition);
-        shader->SetUniform1f("mShiness", 64);
-        shader->SetUniform1f("mSpecularIntensity", 0.5f);
-        shader->SetUniform3fv("ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-        glBindVertexArray(vao);
-        asuna->Bind();
-        glDrawElements(GL_TRIANGLES, sphere->getIndicesCount(), GL_UNSIGNED_INT, (void*)0);
+        render->render(meshes, camera, directionalLight, ambientLight, pointLight);
+
 
         // pass 2
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -247,7 +265,10 @@ int main() {
         glViewport(0, 0, framebufferWidth, framebufferHeight);
         glClear(GL_COLOR_BUFFER_BIT);
         planeShader->UseProgram();
+        planeShader->SetUniform1i("sampler", 0);
+
         glBindVertexArray(planeVao);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, colorAttachment);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDrawElements(GL_TRIANGLES, plane->GetIndexCount(), GL_UNSIGNED_INT, (void*)0);

@@ -19,15 +19,15 @@ void Object::SetScale(glm::vec3 scale) {
 }
 
 void Object::RotateX(float angle) {
-    mAngleX = angle;
+    mAngleX += angle;
 }
 
 void Object::RotateY(float angle) {
-    mAngleY = angle;
+    mAngleY += angle;
 }
 
 void Object::RotateZ(float angle) {
-    mAngleZ = angle;
+    mAngleZ += angle;
 }
 
 glm::mat4 Object::GetModelMatrix() {

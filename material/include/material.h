@@ -6,7 +6,8 @@
 #define MATERIAL_H
 
 enum class MaterialType {
-  PhongMaterial,
+    PhongMaterial,
+    WhiteMaterial,
 };
 
 class Material {

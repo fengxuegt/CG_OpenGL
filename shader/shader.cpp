@@ -70,6 +70,9 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath) {
 
 }
 
+Shader::~Shader() {
+}
+
 std::string Shader::FileContent(std::string path) {
     // 读取文件
     std::ifstream file(path, std::ios::in | std::ios::binary);

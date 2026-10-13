@@ -13,7 +13,7 @@ class Mesh : public Object {
 public:
     Mesh(Geometry * geometry, Material * material);
     ~Mesh();
-private:
+public:
     Geometry* mGeometry{nullptr};
     Material* mMaterial{nullptr};
 };
