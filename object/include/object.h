@@ -4,8 +4,15 @@
 
 #ifndef OBJECT_H
 #define OBJECT_H
+#include <vector>
+
 #include "basecore.h"
 
+enum class ObjectType {
+    Object,
+    Mesh,
+    Scene
+};
 
 class Object {
 public:
@@ -18,7 +25,14 @@ public:
     void RotateY(float angle);
     void RotateZ(float angle);
 
+    void addChild(Object * child);
     glm::mat4 GetModelMatrix();
+public:
+    ObjectType mType;
+
+public:
+    Object* mParent{nullptr};
+    std::vector<Object*> mChildren{};
 
 public:
     glm::vec3 mPosition{0.0f, 0.0f, 0.0f};

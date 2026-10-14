@@ -13,31 +13,37 @@
 #include <triangle.h>
 #include <vector>
 #include <whitematerial.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "basecore.h"
 #include "gamecameracontrol.h"
 #include "trackballcameracontrol.h"
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 1800
+#define HEIGHT 1600
 
 // camera
 Camera *camera = nullptr;
 CameraControl *cameraControl = nullptr;
 
-GLuint vao = 0;
 GLuint planeVao = 0;
 Shader * shader = nullptr;
 Shader * planeShader = nullptr;
-Geometry *sphere = nullptr;
+Geometry *box = nullptr;
 Plane * plane = nullptr;
 GLuint colorAttachment = 0;
 DirectionalLight * directionalLight = nullptr;
 PointLight * pointLight = nullptr;
 AmbientLight * ambientLight = nullptr;
-
+ImVec4 backgroundColor{
+    0.2f,
+    0.3f,
+    0.3f,
+    1.0f
+};
 GLuint fbo = 0;
-
-std::vector<Mesh*> meshes;
+Scene * scene = nullptr;
 
 void prepareGeometry() {
     /*
@@ -64,23 +70,33 @@ void prepareGeometry() {
 
 }
 void prepare() {
-    sphere = Geometry::createBox(2);
-    vao = sphere->getVao();
+    // box
+    scene = new Scene();
+    box = Geometry::createBox(2);
     PhongMaterial * material = new PhongMaterial();
-    Texture *box = new Texture("assets/textures/box.png");
+    Texture *boxtexture = new Texture("assets/textures/box.png");
     Texture * boxMask = new Texture("assets/textures/sp_mask.png");
-    material->mDiffuse = box;
+    material->mDiffuse = boxtexture;
     material->mSpecularMask = boxMask;
     material->mShininess = 16.0f;
-    auto mesh = new ::Mesh(sphere, material);
-    meshes.push_back(mesh);
+    auto mesh = new Mesh(box, material);
+
+    scene->addChild(mesh);
+
+    Geometry *sphere = Geometry::createSphere(2);
+    auto spheremesh = new ::Mesh(sphere, material);
+    spheremesh->SetPosition(glm::vec3(0, 4.0f, 0));
+    mesh->addChild(spheremesh);
+    scene->addChild(spheremesh);
+
+
 
     // point light
     auto pointlightge = Geometry::createSphere(0.5f);
     auto whiteMaterial = new WhiteMaterial();
     auto pointmesh = new Mesh(pointlightge, whiteMaterial);
     pointmesh->SetPosition(glm::vec3(4.0f, 0.0f,0.0f));
-    meshes.push_back(pointmesh);
+    scene->addChild(pointmesh);
 
     planeShader = new Shader("assets/shaders/plane.vert", "assets/shaders/plane.frag");
 }
@@ -97,7 +113,7 @@ void prepareLight() {
     // point light
     pointLight = new PointLight();
     pointLight->mColor = lightColor;
-    pointLight->SetPosition(glm::vec3(4.0f, 0.0f,0.0f));
+    pointLight->SetPosition(glm::vec3(4.0f, 0.0f,5.0f));
 	pointLight->mK2 = 0.017f;
 	pointLight->mK1 = 0.07f;
 	pointLight->mKc = 1.0f;
@@ -187,19 +203,34 @@ void PrepareCamera() {
 }
 
 void Transform() {
-    // glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    // glm::vec3 newPos = glm::mat3(rotate * pointLight->GetModelMatrix()) * pointLight->mPosition;
-    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(sin(glfwGetTime()) * 0.5, 0.0f, 0.0f));
-    const glm::vec3 pointLightInitialPosition(4.0f, 0.0f, 0.0f);
-    float offsetX =
-        std::sin(static_cast<float>(glfwGetTime())) * 2.f;
-    glm::vec3 newPos =
-        pointLightInitialPosition +
-        glm::vec3(offsetX, 0.0f, 0.0f);
-    pointLight->SetPosition(newPos);
-    meshes[1]->SetPosition(newPos);
+
 }
 
+void initIMGUI(GLFWwindow * window) {
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330 core");
+}
+void renderIMGUI(GLFWwindow * window) {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("CG_OpenGL");
+    ImGui::Text("CG_OpenGL");
+    ImGui::ColorEdit4("BrackGround", &backgroundColor.x);
+
+    // ImGui::ColorEdit3("Clear", (float*)&dirLight->mLightColor);
+    ImGui::End();
+
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+}
 int main() {
 
 
@@ -240,9 +271,10 @@ int main() {
     prepareFramebuffer(framebufferWidth, framebufferHeight);
     prepare();
     prepareLight();
+    initIMGUI(window);
 
     // 设置渲染状态
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
     glEnable(GL_DEPTH_TEST);
 
 
@@ -254,10 +286,16 @@ int main() {
         // pass 1
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         // glViewport(0, 0, WIDTH, HEIGHT);
+        glClearColor(
+        backgroundColor.x,
+        backgroundColor.y,
+        backgroundColor.z,
+        backgroundColor.w
+        );
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Transform();
-        render->render(meshes, camera, directionalLight, ambientLight, pointLight);
 
+        render->render(scene, camera, directionalLight, ambientLight, pointLight);
 
         // pass 2
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -272,7 +310,7 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, colorAttachment);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDrawElements(GL_TRIANGLES, plane->GetIndexCount(), GL_UNSIGNED_INT, (void*)0);
-
+        renderIMGUI(window);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

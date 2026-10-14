@@ -5,6 +5,7 @@
 #include "object.h"
 
 Object::Object() {
+    mType = ObjectType::Object;
 }
 
 Object::~Object() {
@@ -30,6 +31,14 @@ void Object::RotateZ(float angle) {
     mAngleZ += angle;
 }
 
+void Object::addChild(Object *child) {
+    child->mParent = this;
+    auto it = std::find(mChildren.begin(), mChildren.end(), child);
+    if (it == mChildren.end()) {
+        mChildren.push_back(child);
+    }
+}
+
 glm::mat4 Object::GetModelMatrix() {
     glm::mat4 model = glm::mat4(1.0f);
     // rotate
@@ -41,6 +50,9 @@ glm::mat4 Object::GetModelMatrix() {
     // transform
     glm::mat4 transfom = glm::mat4(1.0f);
     transfom = glm::translate(transfom, mPosition);
+    if (mParent != nullptr) {
+        return mParent->GetModelMatrix() * transfom * model;
+    }
     return transfom * model;
 }
 

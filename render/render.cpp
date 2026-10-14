@@ -19,15 +19,21 @@ Render::~Render() {
     }
 }
 
-void Render::render(const std::vector<Mesh *> &meshes, Camera *camera, DirectionalLight *directionallight,
+void Render::render(Scene *scene, Camera *camera, DirectionalLight *directionallight,
     AmbientLight *ambientLight, PointLight* pointLight) {
-
+    // 设置状态机基本状态
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // 渲染物体
+    RenderObject(scene, camera, directionallight, ambientLight, pointLight);
+}
 
-    for (unsigned int i = 0; i < meshes.size(); i++) {
-        Mesh* mesh = meshes[i];
+void Render::RenderObject(Object *object, Camera *camera, DirectionalLight *directionalLight, AmbientLight *ambientLight,
+    PointLight *pointLight) {
+    // if mesh
+    if (object->mType == ObjectType::Mesh) {
+        Mesh* mesh = static_cast<Mesh*>(object);
         Geometry *geometry = mesh->mGeometry;
         Material *material = mesh->mMaterial;
         Shader * shader = pickShader(material->mType);
@@ -71,9 +77,15 @@ void Render::render(const std::vector<Mesh *> &meshes, Camera *camera, Direction
                 break;
             }
             default:
-                continue;
+                break;
         }
     }
+
+    // child
+    for (int i = 0; i < object->mChildren.size(); i++) {
+        RenderObject(object->mChildren[i], camera, directionalLight, ambientLight, pointLight);
+    }
+
 }
 
 Shader * Render::pickShader(MaterialType type) {
