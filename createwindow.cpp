@@ -20,6 +20,7 @@
 #include "basecore.h"
 #include "gamecameracontrol.h"
 #include "trackballcameracontrol.h"
+#include "assimploader.h"
 #define WIDTH 1800
 #define HEIGHT 1600
 
@@ -81,13 +82,13 @@ void prepare() {
     material->mShininess = 16.0f;
     auto mesh = new Mesh(box, material);
 
-    scene->addChild(mesh);
+    // scene->addChild(mesh);
 
     Geometry *sphere = Geometry::createSphere(2);
     auto spheremesh = new ::Mesh(sphere, material);
     spheremesh->SetPosition(glm::vec3(0, 4.0f, 0));
     mesh->addChild(spheremesh);
-    scene->addChild(spheremesh);
+    // scene->addChild(spheremesh);
 
 
 
@@ -96,7 +97,29 @@ void prepare() {
     auto whiteMaterial = new WhiteMaterial();
     auto pointmesh = new Mesh(pointlightge, whiteMaterial);
     pointmesh->SetPosition(glm::vec3(4.0f, 0.0f,0.0f));
-    scene->addChild(pointmesh);
+    // scene->addChild(pointmesh);
+
+    // model
+    Object* fbxModel =
+    AssimpLoader::load("assets/model/Fist Fight B.fbx");
+    if (fbxModel != nullptr) {
+        fbxModel->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        fbxModel->SetScale(glm::vec3(0.01f)); // FBX 经常尺寸较大
+        fbxModel->SetAngleY(0.0f);
+
+        scene->addChild(fbxModel);
+    } else {
+        std::cerr << "FBX model load failed" << std::endl;
+    }
+
+    Object* objModel =
+        AssimpLoader::load("assets/models/bag/backpack.obj");
+    if (objModel != nullptr) {
+        objModel->SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
+        objModel->SetScale(glm::vec3(.5f)); // FBX 经常尺寸较大
+        objModel->SetAngleY(0.0f);
+        scene->addChild(objModel);
+    }
 
     planeShader = new Shader("assets/shaders/plane.vert", "assets/shaders/plane.frag");
 }
@@ -108,12 +131,14 @@ void prepareLight() {
     directionalLight->mColor = lightColor;
     directionalLight->mDirection = lightDirection;
     directionalLight->mSpecularIntensity = 2.0f;
-    ambientLight->mColor = glm::vec3(0.1f, 0.1f, 0.1f);
+    ambientLight->mColor = glm::vec3(0.3f);
 
     // point light
     pointLight = new PointLight();
+    // 放到模型正前上方
+    pointLight->SetPosition(glm::vec3(2.0f, 3.0f, 2.0f));
     pointLight->mColor = lightColor;
-    pointLight->SetPosition(glm::vec3(4.0f, 0.0f,5.0f));
+    pointLight->mSpecularIntensity = 2.0f;
 	pointLight->mK2 = 0.017f;
 	pointLight->mK1 = 0.07f;
 	pointLight->mKc = 1.0f;
@@ -203,7 +228,7 @@ void PrepareCamera() {
 }
 
 void Transform() {
-
+    scene->mChildren[0]->RotateY(0.3);
 }
 
 void initIMGUI(GLFWwindow * window) {

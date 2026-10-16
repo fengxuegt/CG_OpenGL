@@ -85,7 +85,6 @@ void Render::RenderObject(Object *object, Camera *camera, DirectionalLight *dire
     for (int i = 0; i < object->mChildren.size(); i++) {
         RenderObject(object->mChildren[i], camera, directionalLight, ambientLight, pointLight);
     }
-
 }
 
 Shader * Render::pickShader(MaterialType type) {

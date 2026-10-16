@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 #glfw
 find_package(glfw3 3.3 REQUIRED)
+#assimp
+find_package(assimp REQUIRED)
 #glad
 add_subdirectory(thirdparty/glad)
 #shader
@@ -27,6 +29,8 @@ add_subdirectory(material)
 add_subdirectory(light)
 #render
 add_subdirectory(render)
+#tools
+add_subdirectory(tools)
 #复制文件
 # 复制文件
 file(GLOB ASSETS "./assets" )
@@ -38,7 +42,7 @@ file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
 add_executable(CG_OpenGL_createwindow createwindow.cpp)
 add_executable(CG_OpenGL_framebuffer framebuffer_record.cpp)
 
-target_link_libraries(CG_OpenGL_createwindow glad glfw shader geometry glm texture camera object material light render imgui)
+target_link_libraries(CG_OpenGL_createwindow glad glfw shader geometry glm texture camera object material light render imgui tools)
 target_link_libraries(CG_OpenGL_framebuffer glad glfw shader geometry glm camera)
 
 

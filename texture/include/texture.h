@@ -10,7 +10,20 @@
 class Texture {
 public:
   void Bind(unsigned int slot = 0) const;
-
+  static Texture* createTexture(const std::string& path, unsigned int unit);
+  Texture(const std::string &path, int unitID, unsigned int internalFormat = GL_RGBA);
+  Texture(unsigned int unit,
+    unsigned char* dataIn,
+    uint32_t widthIn,
+    uint32_t heightIn
+    , unsigned int internalFormat = GL_RGBA);
+  static Texture* createTextureFromMemory(
+  const std::string& path,
+  unsigned int unit,
+  unsigned char* dataIn,
+  uint32_t widthIn,
+  uint32_t heightIn
+);
 public:
   Texture(const std::string &path);
   ~Texture();
@@ -18,6 +31,11 @@ public:
 private:
   GLuint mTextureID;
   GLuint mUnitID;
+
+  int mWidth{0};
+  int mHeight{0};
+
+  static std::map<std::string, Texture*> mTextureCache;
 };
 
 

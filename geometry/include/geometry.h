@@ -12,6 +12,21 @@ public:
     Geometry();
     ~Geometry();
 
+    // 用于读取模型
+    Geometry(const std::vector<float> &positions,
+        const std::vector<float> &normals,
+        const std::vector<float> &uvs,
+        const std::vector<unsigned int> &indices
+        );
+
+
+    Geometry(const std::vector<float> &positions,
+    const std::vector<float> &normals,
+    const std::vector<float> &uvs,
+    const std::vector<unsigned int> &indices,
+    const std::vector<float> &tangents
+    );
+
     static Geometry* createBox(float size);
     static Geometry* createSphere(float radius);
     static Geometry* createPlane(float width, float height);

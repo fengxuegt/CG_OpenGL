@@ -21,9 +21,16 @@ public:
 
     void SetPosition(glm::vec3 pos);
     void SetScale(glm::vec3 scale);
+
+    // 增量旋转
     void RotateX(float angle);
     void RotateY(float angle);
     void RotateZ(float angle);
+
+    // 设置函数
+    void SetAngleX(float angle);
+    void SetAngleY(float angle);
+    void SetAngleZ(float angle);
 
     void addChild(Object * child);
     glm::mat4 GetModelMatrix();
@@ -43,6 +50,17 @@ public:
 
 };
 
+inline void Object::SetAngleZ(float angle) {
+    mAngleZ = angle;
+}
+
+inline void Object::SetAngleY(float angle) {
+    mAngleY = angle;
+}
+
+inline void Object::SetAngleX(float angle) {
+    mAngleX = angle;
+}
 
 
 #endif //OBJECT_H

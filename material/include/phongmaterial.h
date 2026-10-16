@@ -4,8 +4,8 @@
 
 #ifndef PHONGMATERIAL_H
 #define PHONGMATERIAL_H
-#include <material.h>
-#include <texture.h>
+#include "material.h"
+#include "texture.h"
 
 
 class PhongMaterial : public Material {
