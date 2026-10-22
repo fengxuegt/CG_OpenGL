@@ -99,6 +99,37 @@ void prepare() {
     pointmesh->SetPosition(glm::vec3(4.0f, 0.0f,0.0f));
     // scene->addChild(pointmesh);
 
+    // plane
+    auto planeGeA = Geometry::createPlane(8, 6);
+    PhongMaterial * planeAMaterial = new PhongMaterial();
+    planeAMaterial->mDiffuse = new Texture("assets/textures/wall.jpg", 0);
+    planeAMaterial->mSpecularMask = new Texture("assets/textures/sp_mask.png", 1);
+    auto planeA = new Mesh(planeGeA, planeAMaterial);
+    planeA->SetPosition(glm::vec3(0.0f, 0.0f, -13.0f));
+    scene->addChild(planeA);
+
+
+
+    auto planeGeB = Geometry::createPlane(8, 6);
+    PhongMaterial * planeBMaterial = new PhongMaterial();
+    planeBMaterial->mDiffuse = new Texture("assets/textures/goku.jpg", 0);
+    planeBMaterial->mSpecularMask = new Texture("assets/textures/sp_mask.png", 1);
+    auto planeB = new Mesh(planeGeB, planeBMaterial);
+    planeB->SetPosition(glm::vec3(1.0f, -1.0f, -14.0f));
+    scene->addChild(planeB);
+
+
+    // auto planeGeA = Geometry::createPlane(8, 6);
+    PhongMaterial * planeCMaterial = new PhongMaterial();
+    planeCMaterial->mDiffuse = new Texture("assets/textures/asuna.png", 0);
+    planeCMaterial->mSpecularMask = new Texture("assets/textures/sp_mask.png", 1);
+    auto planeC = new Mesh(planeGeA, planeCMaterial);
+    planeC->SetPosition(glm::vec3(2.0f, -2.0f, -15.0f));
+    scene->addChild(planeC);
+
+
+
+
     // model
     Object* fbxModel =
     AssimpLoader::load("assets/model/Fist Fight B.fbx");
@@ -107,7 +138,7 @@ void prepare() {
         fbxModel->SetScale(glm::vec3(0.01f)); // FBX 经常尺寸较大
         fbxModel->SetAngleY(0.0f);
 
-        scene->addChild(fbxModel);
+        // scene->addChild(fbxModel);
     } else {
         std::cerr << "FBX model load failed" << std::endl;
     }
@@ -118,7 +149,7 @@ void prepare() {
         objModel->SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
         objModel->SetScale(glm::vec3(.5f)); // FBX 经常尺寸较大
         objModel->SetAngleY(0.0f);
-        scene->addChild(objModel);
+        // scene->addChild(objModel);
     }
 
     planeShader = new Shader("assets/shaders/plane.vert", "assets/shaders/plane.frag");
@@ -131,7 +162,7 @@ void prepareLight() {
     directionalLight->mColor = lightColor;
     directionalLight->mDirection = lightDirection;
     directionalLight->mSpecularIntensity = 2.0f;
-    ambientLight->mColor = glm::vec3(0.3f);
+    ambientLight->mColor = glm::vec3(0.6f);
 
     // point light
     pointLight = new PointLight();
@@ -318,7 +349,7 @@ int main() {
         backgroundColor.w
         );
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Transform();
+        // Transform();
 
         render->render(scene, camera, directionalLight, ambientLight, pointLight);
 
